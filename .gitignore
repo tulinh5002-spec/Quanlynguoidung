@@ -1,0 +1,37 @@
+# Secrets and local environment settings
+**/.env
+!**/.env.example
+
+# Node dependencies and runtime logs
+**/node_modules/
+backend/*.log
+flutter_app/*.log
+
+# Flutter generated files
+flutter_app/.dart_tool/
+flutter_app/build/
+flutter_app/.flutter-plugins-dependencies
+flutter_app/android/local.properties
+flutter_app/android/.gradle/
+flutter_app/android/.kotlin/
+flutter_app/android/app/.cxx/
+
+# IDE and operating system files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+.emulator/
+
+.tmp/
+
+# Local emulator diagnostics and screenshots
+.codex-*
+flutter_app/app-preview.png
+flutter_app/portrait-preview.png
+flutter_app/ime-debug.png
+flutter_app/ime-fixed.png
+flutter_app/soft-ui.png
+**/.dart_local_state/
+**/.expo/

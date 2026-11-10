@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "User Management",
+    "slug": "user-management-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": { "supportsTablet": true },
+    "android": { "edgeToEdgeEnabled": true },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Ứng dụng cần truy cập ảnh để cập nhật ảnh đại diện.",
+          "cameraPermission": "Ứng dụng cần dùng camera để chụp ảnh đại diện.",
+          "microphonePermission": false
+        }
+      ]
+    ]
+  }
+}
