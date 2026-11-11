@@ -61,3 +61,11 @@ Mongoose tao collection `users` voi cac document co dang:
 ```
 
 De nop du lieu, export collection `users` tu MongoDB Compass bang JSON/Extended JSON. Khong dua mat khau that vao file nop; dung tai khoan demo. Schema gioi han bon truong nen khong co role; do do moi tai khoan dang nhap trong ban demo duoc phep CRUD.
+
+## Xuất JSON đúng bốn trường
+
+Schema hiện chỉ lưu `email`, `matkhau`, `hoten`, `hinhanh`; MongoDB tự quản lý thêm `_id`. API bỏ qua các trường khác, không trả `matkhau` cho giao diện.
+
+Chạy `node backend/exportDatabase.js` từ thư mục gốc để xuất `backend/NovaID_MongoDB_Database.json` (chỉ đúng bốn trường, không gồm `_id`). Bản `NovaID_MongoDB_Database.mongo.json` từ migration có thêm `_id` kiểu Extended JSON để giữ định danh khi nhập bằng MongoDB Compass.
+
+Migration dữ liệu: `node backend/scripts/migrateFourFields.js`. Script sao lưu trước khi xóa các trường thừa, kiểm tra số lượng và nội dung bốn trường không đổi. Bản sao lưu nằm trong `backend/backups/`, không đưa lên Git. Nếu tài khoản MongoDB không có quyền `collMod`, schema Mongoose và danh sách trường trong API vẫn giới hạn dữ liệu ứng dụng; quy tắc ở cấp collection cần tài khoản có quyền tương ứng.

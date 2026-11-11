@@ -4,16 +4,16 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 
 const demoUsers = [
-  ["Nguyễn Minh Anh", "minh.anh.demo01@example.com", "Nữ", "2001-04-12"],
-  ["Trần Quốc Bảo", "quoc.bao.demo02@example.com", "Nam", "1998-09-23"],
-  ["Lê Thu Hà", "thu.ha.demo03@example.com", "Nữ", "2002-01-17"],
-  ["Phạm Gia Huy", "gia.huy.demo04@example.com", "Nam", "1999-06-08"],
-  ["Võ Ngọc Linh", "ngoc.linh.demo05@example.com", "Nữ", "2000-11-30"],
-  ["Đặng Hoàng Nam", "hoang.nam.demo06@example.com", "Nam", "1997-03-05"],
-  ["Bùi Khánh Vy", "khanh.vy.demo07@example.com", "Nữ", "2003-08-19"],
-  ["Đỗ Đức Thành", "duc.thanh.demo08@example.com", "Nam", "1996-12-02"],
-  ["Hoàng Mai Phương", "mai.phuong.demo09@example.com", "Nữ", "2001-07-26"],
-  ["Vũ Nhật Minh", "nhat.minh.demo10@example.com", "Nam", "2000-02-14"],
+  ["Nguyễn Minh Anh", "minh.anh.demo01@example.com"],
+  ["Trần Quốc Bảo", "quoc.bao.demo02@example.com"],
+  ["Lê Thu Hà", "thu.ha.demo03@example.com"],
+  ["Phạm Gia Huy", "gia.huy.demo04@example.com"],
+  ["Võ Ngọc Linh", "ngoc.linh.demo05@example.com"],
+  ["Đặng Hoàng Nam", "hoang.nam.demo06@example.com"],
+  ["Bùi Khánh Vy", "khanh.vy.demo07@example.com"],
+  ["Đỗ Đức Thành", "duc.thanh.demo08@example.com"],
+  ["Hoàng Mai Phương", "mai.phuong.demo09@example.com"],
+  ["Vũ Nhật Minh", "nhat.minh.demo10@example.com"],
 ];
 
 async function seedDemoUsers() {
@@ -26,14 +26,10 @@ async function seedDemoUsers() {
   let created = 0;
   let skipped = 0;
 
-  for (const [hoten, email, gioitinh, ngaysinh] of demoUsers) {
+  for (const [hoten, email] of demoUsers) {
     const normalizedEmail = email.toLowerCase();
     const existing = await User.findOne({ email: normalizedEmail });
     if (existing) {
-      const updates = {};
-      if (!existing.gioitinh) updates.gioitinh = gioitinh;
-      if (!existing.ngaysinh) updates.ngaysinh = ngaysinh;
-      if (Object.keys(updates).length) await User.updateOne({ _id: existing._id }, { $set: updates });
       skipped += 1;
       continue;
     }
@@ -42,8 +38,6 @@ async function seedDemoUsers() {
       email: normalizedEmail,
       matkhau: passwordHash,
       hoten,
-      gioitinh,
-      ngaysinh,
       hinhanh: "",
     });
     created += 1;

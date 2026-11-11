@@ -58,6 +58,10 @@ powershell -ExecutionPolicy Bypass -File tools/start-wide-emulator.ps1
 
 Để chọn ảnh trên máy tính cho Android, chạy `powershell -ExecutionPolicy Bypass -File tools/import-emulator-images.ps1`, chọn ảnh, sau đó bấm **Chọn ảnh từ thiết bị** trong ứng dụng. Có thể truyền `-Device emulator-5556` nếu dùng cổng khác. Trên Flutter Web, nút **Chọn ảnh từ máy tính** mở trực tiếp hộp chọn tệp.
 
-Trang **Tài khoản** hiển thị hồ sơ, gồm địa chỉ. Bấm **Cập nhật thông tin** để sửa. Ngày sinh có thể nhập theo `YYYY-MM-DD` hoặc chọn lịch. Địa chỉ được lưu ở trường `diachi` trong MongoDB; cần khởi động lại backend sau khi cập nhật mã.
+Ứng dụng chỉ sử dụng bốn trường `email`, `matkhau`, `hoten`, `hinhanh` theo yêu cầu nộp bài. Trang **Tài khoản** hiển thị hồ sơ và cho phép cập nhật thông tin. MongoDB tự quản lý thêm `_id`; file xuất nộp bài chỉ gồm bốn trường nghiệp vụ.
 
 Nếu Gboard chỉ hiện thanh công cụ viết tay ở cạnh màn hình, chọn lại bàn phím QWERTY trong cài đặt ngôn ngữ Gboard. Máy ảo hiện đã được chuyển sang QWERTY và bật hiển thị bàn phím ảo khi dùng bàn phím máy tính; không cần sửa kiểu nhập của các trường Flutter.
+
+## Chạy Android bằng CMD khi đường dẫn dự án có dấu
+
+Tại thư mục gốc chạy `tools\run-android.cmd`; nếu đang ở `flutter_app`, chạy `..\tools\run-android.cmd`. Script dùng ổ ánh xạ U: và Java 17 để tránh lỗi aapt đọc APK hoặc không tải được GradleWrapperMain trên đường dẫn có dấu. Mở máy ảo và backend trước khi chạy.

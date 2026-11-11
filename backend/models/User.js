@@ -19,24 +19,12 @@ const userSchema = new mongoose.Schema({
     required: true
   },
 
-  gioitinh: {
-    type: String,
-    enum: ["", "Nam", "Nữ", "Khác"],
-    default: ""
-  },
-
-  ngaysinh: {
-    type: String,
-    default: "",
-    match: [/^$|^\d{4}-\d{2}-\d{2}$/, "Ngay sinh phai co dang YYYY-MM-DD"]
-  },
-
-  diachi: { type: String, trim: true, maxlength: 500, default: "" },
   hinhanh: {
     type: String,
     default: ""
   }
 }, {
+  strict: true,
   versionKey: false
 });
 

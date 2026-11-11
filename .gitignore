@@ -35,3 +35,7 @@ flutter_app/ime-fixed.png
 flutter_app/soft-ui.png
 **/.dart_local_state/
 **/.expo/
+
+# Private database backups and exports (contain password hashes and profile images)
+backend/backups/
+backend/NovaID_MongoDB_Database*.json

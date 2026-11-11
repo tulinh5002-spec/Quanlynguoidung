@@ -131,8 +131,6 @@ class _UserManagementHomeState extends State<UserManagementHome> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _currentPassword = TextEditingController();
-  final _birthDate = TextEditingController();
-  final _address = TextEditingController();
   final _imageUrl = TextEditingController();
   final _search = TextEditingController();
 
@@ -141,7 +139,6 @@ class _UserManagementHomeState extends State<UserManagementHome> {
   List<Map<String, dynamic>> _users = [];
   String _imageData = '';
   String? _editingId;
-  String _gender = '';
   String? _error;
   int _dashboardTab = 0;
   bool _editingProfile = false;
@@ -166,8 +163,6 @@ class _UserManagementHomeState extends State<UserManagementHome> {
     _email.dispose();
     _password.dispose();
     _currentPassword.dispose();
-    _birthDate.dispose();
-    _address.dispose();
     _imageUrl.dispose();
     _search.dispose();
     super.dispose();
@@ -320,35 +315,6 @@ class _UserManagementHomeState extends State<UserManagementHome> {
     }
   }
 
-  Future<void> _chooseBirthDate() async {
-    final parsed = DateTime.tryParse(_birthDate.text);
-    final today = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: parsed != null && !parsed.isAfter(today)
-          ? parsed
-          : DateTime(today.year - 18, today.month, today.day),
-      firstDate: DateTime(1900),
-      lastDate: today,
-      helpText: 'Chọn ngày sinh',
-    );
-    if (picked == null) return;
-    setState(() {
-      _birthDate.text =
-          '${picked.year.toString().padLeft(4, '0')}-'
-          '${picked.month.toString().padLeft(2, '0')}-'
-          '${picked.day.toString().padLeft(2, '0')}';
-    });
-  }
-
-  String _displayBirthDate(String value) {
-    final date = DateTime.tryParse(value);
-    if (date == null) return '';
-    return '${date.day.toString().padLeft(2, '0')}/'
-        '${date.month.toString().padLeft(2, '0')}/'
-        '${date.year}';
-  }
-
   void _editUser(Map<String, dynamic> user, {bool profile = false}) {
     setState(() {
       _dashboardTab = profile ? 2 : 1;
@@ -358,9 +324,6 @@ class _UserManagementHomeState extends State<UserManagementHome> {
       _email.text = user['email']?.toString() ?? '';
       _password.clear();
       _currentPassword.clear();
-      _gender = user['gioitinh']?.toString() ?? '';
-      _birthDate.text = user['ngaysinh']?.toString() ?? '';
-      _address.text = user['diachi']?.toString() ?? '';
       final image = user['hinhanh']?.toString() ?? '';
       if (image.startsWith('data:')) {
         _imageData = image;
@@ -390,9 +353,6 @@ class _UserManagementHomeState extends State<UserManagementHome> {
     _email.clear();
     _password.clear();
     _currentPassword.clear();
-    _gender = '';
-    _birthDate.clear();
-    _address.clear();
     _imageUrl.clear();
   }
 
@@ -407,9 +367,6 @@ class _UserManagementHomeState extends State<UserManagementHome> {
     final body = <String, dynamic>{
       'hoten': _name.text.trim(),
       'email': _email.text.trim(),
-      'gioitinh': _gender,
-      'ngaysinh': _birthDate.text.trim(),
-      'diachi': _address.text.trim(),
       'hinhanh': _imageData.isNotEmpty ? _imageData : _imageUrl.text.trim(),
     };
     if (_password.text.isNotEmpty) {
@@ -1245,46 +1202,6 @@ class _UserManagementHomeState extends State<UserManagementHome> {
             validator: _emailValidator,
           ),
           const SizedBox(height: 13),
-          DropdownButtonFormField<String>(
-            initialValue: _gender.isEmpty ? null : _gender,
-            decoration: const InputDecoration(
-              labelText: 'Giới tính',
-              prefixIcon: Icon(Icons.wc_outlined),
-            ),
-            items: const [
-              DropdownMenuItem(value: 'Nam', child: Text('Nam')),
-              DropdownMenuItem(value: 'Nữ', child: Text('Nữ')),
-              DropdownMenuItem(value: 'Khác', child: Text('Khác')),
-            ],
-            onChanged: (value) => setState(() => _gender = value ?? ''),
-          ),
-          const SizedBox(height: 13),
-          TextFormField(
-            controller: _birthDate,
-            keyboardType: TextInputType.datetime,
-            validator: _birthDateValidator,
-            decoration: InputDecoration(
-              labelText: 'Ngày sinh',
-              hintText: 'YYYY-MM-DD',
-              prefixIcon: const Icon(Icons.cake_outlined),
-              suffixIcon: IconButton(
-                tooltip: 'Chọn ngày sinh',
-                onPressed: _chooseBirthDate,
-                icon: const Icon(Icons.calendar_month_outlined),
-              ),
-            ),
-          ),
-          const SizedBox(height: 13),
-          _Field(
-            label: 'Địa chỉ',
-            controller: _address,
-            hint: 'Số nhà, đường, phường/xã, tỉnh/thành phố',
-            keyboardType: TextInputType.streetAddress,
-            large: true,
-            validator: (value) =>
-                (value?.length ?? 0) > 500 ? 'Địa chỉ tối đa 500 ký tự.' : null,
-          ),
-          const SizedBox(height: 18),
           if (_editingId == null || _editingProfile) ...[
             if (_editingProfile) ...[
               _Field(
@@ -1363,9 +1280,9 @@ class _UserManagementHomeState extends State<UserManagementHome> {
     final shown = _users
         .where(
           (user) =>
-              '${user['hoten']} ${user['email']} ${user['diachi'] ?? ''}'
-                  .toLowerCase()
-                  .contains(term) &&
+              '${user['hoten']} ${user['email']}'.toLowerCase().contains(
+                term,
+              ) &&
               (_avatarFilter == 0 ||
                   ((user['hinhanh'] ?? '').toString().trim().isNotEmpty) ==
                       (_avatarFilter == 1)),
@@ -1413,7 +1330,7 @@ class _UserManagementHomeState extends State<UserManagementHome> {
             controller: _search,
             decoration: InputDecoration(
               prefixIcon: Icon(Icons.search),
-              hintText: 'Tìm theo tên, email hoặc địa chỉ...',
+              hintText: 'Tìm theo tên hoặc email...',
               isDense: true,
               suffixIcon: term.isEmpty
                   ? null
@@ -1461,10 +1378,6 @@ class _UserManagementHomeState extends State<UserManagementHome> {
                     itemBuilder: (context, index) {
                       final user = shown[index];
                       final name = user['hoten']?.toString() ?? '';
-                      final gender = user['gioitinh']?.toString() ?? '';
-                      final birthDate = _displayBirthDate(
-                        user['ngaysinh']?.toString() ?? '',
-                      );
                       return Container(
                         margin: const EdgeInsets.only(bottom: 9),
                         padding: const EdgeInsets.fromLTRB(14, 14, 10, 12),
@@ -1515,34 +1428,6 @@ class _UserManagementHomeState extends State<UserManagementHome> {
                                           fontSize: 14,
                                         ),
                                       ),
-                                      if (gender.isNotEmpty ||
-                                          birthDate.isNotEmpty) ...[
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          [
-                                            if (gender.isNotEmpty) gender,
-                                            if (birthDate.isNotEmpty) birthDate,
-                                          ].join(' • '),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            color: _muted,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                      if ((user['diachi'] ?? '')
-                                          .toString()
-                                          .isNotEmpty)
-                                        Text(
-                                          user['diachi'].toString(),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            color: _muted,
-                                            fontSize: 16,
-                                          ),
-                                        ),
                                     ],
                                   ),
                                 ),
@@ -1614,20 +1499,6 @@ class _UserManagementHomeState extends State<UserManagementHome> {
     );
   }
 
-  String? _birthDateValidator(String? value) {
-    if (value == null || value.trim().isEmpty) return null;
-    final text = value.trim();
-    final date = DateTime.tryParse(text);
-    if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(text) ||
-        date == null ||
-        date.toIso8601String().substring(0, 10) != text ||
-        date.year < 1900 ||
-        date.isAfter(DateTime.now())) {
-      return 'Nhập ngày có thật theo YYYY-MM-DD, không vượt quá hôm nay.';
-    }
-    return null;
-  }
-
   Widget _profilePage() {
     final user = _me!;
     return ListView(
@@ -1689,11 +1560,6 @@ class _UserManagementHomeState extends State<UserManagementHome> {
               const SizedBox(height: 15),
               for (final entry in <String, String>{
                 'Email': user['email']?.toString() ?? '',
-                'Giới tính': user['gioitinh']?.toString() ?? '',
-                'Ngày sinh': _displayBirthDate(
-                  user['ngaysinh']?.toString() ?? '',
-                ),
-                'Địa chỉ': user['diachi']?.toString() ?? '',
               }.entries) ...[
                 Container(
                   margin: const EdgeInsets.only(bottom: 11),

@@ -10,39 +10,19 @@ const publicUser = (user) => ({
   id: user._id,
   email: user.email,
   hoten: user.hoten,
-  gioitinh: user.gioitinh || "",
-  ngaysinh: user.ngaysinh || "",
-  diachi: user.diachi || "",
   hinhanh: user.hinhanh || "",
 });
-const validGenders = new Set(["", "Nam", "Nữ", "Khác"]);
-const isValidBirthDate = (value) => {
-  if (value === "") return true;
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const date = new Date(`${value}T00:00:00.000Z`);
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value && date <= today;
-};
-
 // Tao tai khoan. Mat khau luon duoc bam truoc khi luu MongoDB.
 router.post("/", async (req, res) => {
   try {
-    const { email, matkhau, hoten, hinhanh = "", gioitinh = "", ngaysinh = "", diachi = "" } = req.body;
+    const { email, matkhau, hoten, hinhanh = "" } = req.body;
     if (![email, matkhau, hoten].every((value) => typeof value === "string" && value.trim())) {
       return res.status(400).json({ message: "Vui long nhap email, mat khau va ho ten" });
     }
     if (matkhau.length < 6) {
       return res.status(400).json({ message: "Mat khau phai co it nhat 6 ky tu" });
     }
-    if (typeof gioitinh !== "string" || !validGenders.has(gioitinh)) {
-      return res.status(400).json({ message: "Gioi tinh khong hop le" });
-    }
-    if (!isValidBirthDate(ngaysinh)) {
-      return res.status(400).json({ message: "Ngay sinh khong hop le" });
-    }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return res.status(400).json({ message: "Email khong hop le" });
-    if (typeof diachi !== "string" || diachi.trim().length > 500) return res.status(400).json({ message: "Dia chi toi da 500 ky tu" });
     const normalizedEmail = email.trim().toLowerCase();
     if (await User.exists({ email: normalizedEmail })) {
       return res.status(409).json({ message: "Email da ton tai" });
@@ -51,9 +31,6 @@ router.post("/", async (req, res) => {
       email: normalizedEmail,
       matkhau: await bcrypt.hash(matkhau, 12),
       hoten: hoten.trim(),
-      gioitinh,
-      ngaysinh,
-      diachi: diachi.trim(),
       hinhanh: typeof hinhanh === "string" ? hinhanh.trim() : "",
     });
     return res.status(201).json({ message: "Tao tai khoan thanh cong", user: publicUser(user) });
@@ -87,7 +64,7 @@ router.use(authMiddleware);
 
 router.get("/me", async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select("email hoten gioitinh ngaysinh hinhanh diachi");
+    const user = await User.findById(req.userId).select("email hoten hinhanh");
     if (!user) return res.status(404).json({ message: "Khong tim thay nguoi dung" });
     return res.json({ user: publicUser(user) });
   } catch (error) {
@@ -98,7 +75,7 @@ router.get("/me", async (req, res) => {
 // Danh sach, chi tra ve dung cac truong duoc phep hien thi.
 router.get("/", async (_req, res) => {
   try {
-    const users = await User.find().select("email hoten gioitinh ngaysinh hinhanh diachi").sort({ hoten: 1 });
+    const users = await User.find().select("email hoten hinhanh").sort({ hoten: 1 });
     return res.json(users.map(publicUser));
   } catch (error) {
     console.error("List users:", error);
@@ -109,7 +86,7 @@ router.get("/", async (_req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ message: "ID khong hop le" });
-    const { email, matkhau, matkhauCu, hoten, hinhanh, gioitinh, ngaysinh, diachi } = req.body;
+    const { email, matkhau, matkhauCu, hoten, hinhanh } = req.body;
     const updates = {};
     if (email !== undefined) {
       if (typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return res.status(400).json({ message: "Email khong hop le" });
@@ -118,20 +95,6 @@ router.put("/:id", async (req, res) => {
     if (hoten !== undefined) {
       if (typeof hoten !== "string" || !hoten.trim()) return res.status(400).json({ message: "Ho ten khong hop le" });
       updates.hoten = hoten.trim();
-    }
-    if (gioitinh !== undefined) {
-      if (typeof gioitinh !== "string" || !validGenders.has(gioitinh)) {
-        return res.status(400).json({ message: "Gioi tinh khong hop le" });
-      }
-      updates.gioitinh = gioitinh;
-    }
-    if (ngaysinh !== undefined) {
-      if (!isValidBirthDate(ngaysinh)) return res.status(400).json({ message: "Ngay sinh khong hop le" });
-      updates.ngaysinh = ngaysinh;
-    }
-    if (diachi !== undefined) {
-      if (typeof diachi !== "string" || diachi.trim().length > 500) return res.status(400).json({ message: "Dia chi toi da 500 ky tu" });
-      updates.diachi = diachi.trim();
     }
     if (hinhanh !== undefined) {
       if (typeof hinhanh !== "string") return res.status(400).json({ message: "Hinh anh phai la chuoi URL hoac data URI" });
@@ -152,7 +115,7 @@ router.put("/:id", async (req, res) => {
       updates.matkhau = await bcrypt.hash(matkhau, 12);
     }
     if (!Object.keys(updates).length) return res.status(400).json({ message: "Khong co thong tin de cap nhat" });
-    const user = await User.findByIdAndUpdate(req.params.id, { $set: updates }, { new: true, runValidators: true }).select("email hoten gioitinh ngaysinh hinhanh diachi");
+    const user = await User.findByIdAndUpdate(req.params.id, { $set: updates }, { new: true, runValidators: true }).select("email hoten hinhanh");
     if (!user) return res.status(404).json({ message: "Khong tim thay nguoi dung" });
     return res.json({ message: "Cap nhat thanh cong", user: publicUser(user) });
   } catch (error) {
